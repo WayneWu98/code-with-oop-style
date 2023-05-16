@@ -1,0 +1,26 @@
+{
+  "name": "decorative-dto-demo",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite"
+  },
+  "keywords": [],
+  "author": "Wayne Wu <wayne-wu@outlook.com> (https://wayne-wu.com)",
+  "license": "ISC",
+  "dependencies": {
+    "class-transformer": "^0.5.1",
+    "reflect-metadata": "^0.1.13",
+    "vue": "^3.3.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.3",
+    "esno": "^0.16.3",
+    "nodemon": "^2.0.22",
+    "rollup-plugin-swc": "^0.2.1",
+    "typescript": "^5.0.4",
+    "vite": "^4.3.6"
+  }
+}
