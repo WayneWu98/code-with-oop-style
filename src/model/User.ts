@@ -2,7 +2,7 @@ import BaseModel from './BaseModel'
 import ModelConf from '../decorator/ModelConf'
 import FieldConf from '../decorator/FieldConf'
 import { NamingCase } from '../enum'
-import { Transform } from 'class-transformer'
+import { Transform, Type } from 'class-transformer'
 
 @ModelConf({ name: "用户基本资料", rename: NamingCase.snake_case })
 export class Profile extends BaseModel {
@@ -35,5 +35,6 @@ export default class User extends BaseModel {
   lastModified?: Date
 
   @FieldConf({ name: '个人资料' })
+  @Type(() => Profile)
   profile!: Profile
 }
