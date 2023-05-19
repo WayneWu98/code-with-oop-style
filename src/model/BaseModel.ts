@@ -9,7 +9,7 @@ export default class BaseModel {
   clone() {
     // instanceToInstance will not convert naming case, call our implementation instead
     const model = Reflect.getPrototypeOf(this)!.constructor as typeof BaseModel
-    return model.from(this.toPlain()) as this
+    return plainToInstance(model, this.toModelPlain(), { ignoreDecorators: true }) as typeof this
   }
   // merge target to this in-place, existing properties will be overwritten
   merge(target: typeof this) {
@@ -21,7 +21,15 @@ export default class BaseModel {
   }
   toPlain(): Object {
     const cls = Reflect.getPrototypeOf(this)!.constructor
-    return convertNamingCaseOnSerialize(instanceToPlain(this), cls, cls)
+    return traverseOnSerialize(instanceToPlain(this), cls, cls)
+  }
+  toModelPlain() {
+    /**
+     * there are 2 differences to `toPlain`
+     * 1. no naming-case conversion
+     * 2. no field will be ignore
+     */
+    return instanceToPlain(this)
   }
   // validate current model, return a list of errors, empty list means no error
   // and child models **will not** be validated automatically, you should do it yourself
@@ -77,18 +85,28 @@ export default class BaseModel {
     } else if (typeof raw === 'string') {
       raw = JSON.parse(raw)
     }
-    return plainToInstance(this, convertNamingCaseOnDeserialize(raw, this, this)) as InstanceType<T>
+    return plainToInstance(this, traverseOnDeserialize(raw, this, this)) as InstanceType<T>
   }
 }
 
+function shouldIgnoreSerialize(field?: Field) {
+  if (typeof field?.ignore === 'boolean' && field.ignore) {
+    return true
+  }
+  if (typeof field?.ignore === 'object' && field.ignore.onSerialize) {
+    return true
+  }
+  return false
+}
+
 // convert naming case to forwarded while serializing
-function convertNamingCaseOnSerialize(obj: any, cls: any, superCls: any): any {
+function traverseOnSerialize(obj: any, cls: any, superCls: any): any {
   if (typeof obj !== 'object' || Object.is(obj, null)) {
     // primitive type
     return obj
   }
   if (Array.isArray(obj)) {
-    return obj.map((item) => convertNamingCaseOnSerialize(item, cls, superCls))
+    return obj.map((item) => traverseOnSerialize(item, cls, superCls))
   }
   const transformed: Record<keyof any, any> = {}
   const model: Model = (cls?.getModel?.() ?? superCls?.getModel?.() ?? {}) as Model
@@ -100,24 +118,37 @@ function convertNamingCaseOnSerialize(obj: any, cls: any, superCls: any): any {
     if (!arrayedFields.some((conf) => conf.fieldName === key)) {
       key = namingCaseFnMap[model?.rename ?? NamingCase.NonCase](key)
     }
+    if (shouldIgnoreSerialize(field)) {
+      continue
+    }
     if (field?.transform) {
       transformed[key] = rawValue
       continue
     }
     const _superCls = cls?.prototype instanceof BaseModel ? cls : superCls
-    transformed[key] = convertNamingCaseOnSerialize(rawValue, fields[rawKey]?.type, _superCls)
+    transformed[key] = traverseOnSerialize(rawValue, fields[rawKey]?.type, _superCls)
   }
   return transformed
 }
 
+function shouldIgnoreDeserialize(field?: Field) {
+  if (typeof field?.ignore === 'boolean' && field.ignore) {
+    return true
+  }
+  if (typeof field?.ignore === 'object' && field.ignore.onDeserialize) {
+    return true
+  }
+  return false
+}
+
 // convert naming case to camel case while deserializing
-function convertNamingCaseOnDeserialize(obj: any, cls: any, superCls: any): any {
+function traverseOnDeserialize(obj: any, cls: any, superCls: any): any {
   if (typeof obj !== 'object' || Object.is(obj, null)) {
     // primitive type
     return obj
   }
   if (Array.isArray(obj)) {
-    return obj.map((item) => convertNamingCaseOnDeserialize(item, cls, superCls))
+    return obj.map((item) => traverseOnDeserialize(item, cls, superCls))
   }
   const transformed: Record<keyof any, any> = {}
   const model = (cls?.getModel?.() ?? superCls?.getModel?.() ?? {}) as Model
@@ -131,12 +162,15 @@ function convertNamingCaseOnDeserialize(obj: any, cls: any, superCls: any): any 
       k = camelize(rawKey)
     }
     const field = fields[k] as Field
+    if (shouldIgnoreDeserialize(field)) {
+      continue
+    }
     if (field?.transform) {
       transformed[k] = rawValue
       continue
     }
     const _superCls = cls?.prototype instanceof BaseModel ? cls : superCls
-    transformed[k] = convertNamingCaseOnDeserialize(rawValue, fields[rawKey]?.type, _superCls)
+    transformed[k] = traverseOnDeserialize(rawValue, fields[rawKey]?.type, _superCls)
   }
   return transformed
 }

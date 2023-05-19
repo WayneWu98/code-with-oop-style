@@ -8,6 +8,19 @@
  * @Field({ transform: dateTransformer('yyyy-MM-dd') })
  */
 
+/**
+ * !!!! ATTENTION !!!!
+ * every transformer function should handle 3 cases maybe happen: 
+ * 1. instance to plain object
+ * 2. plain object to instance
+ * 3. instance to instance (clone)
+ * 
+ * Keep attention to the edge cases (null/undefined or others), avoid producing errors, or it will break the normal code flow, and lead to an unexpected result.
+ * While handling the 3rd case above (triggered by `instanceToInstance`), please return the deep cloned value.
+ * 
+ * !!!! ATTENTION !!!!
+ */
+
 import {
   ClassConstructor,
   TransformFnParams,
@@ -15,7 +28,7 @@ import {
   instanceToPlain,
   plainToInstance
 } from 'class-transformer'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 
 /**
 * transform pure string to Dayjs, or Dayjs to string with forwarded format
@@ -33,6 +46,8 @@ export function dateTransformer(format: string) {
           toArray = toArray.map((v) => (v as dayjs.Dayjs).format(format))
       } else if (type === TransformationType.PLAIN_TO_CLASS) {
           toArray = toArray.map((v) => dayjs(v.replace(/-/g, '/')))
+      } else {
+        toArray = toArray.map((v: Dayjs) => v.clone())
       }
       return Array.isArray(value) ? toArray : toArray[0]
   }

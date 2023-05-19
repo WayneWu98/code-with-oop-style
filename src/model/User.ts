@@ -2,7 +2,7 @@ import BaseModel from './BaseModel'
 import Model from '../decorator/Model'
 import Field from '../decorator/Field'
 import { NamingCase } from '@/utils/naming-case'
-import { Exclude, TransformationType } from 'class-transformer'
+import { TransformationType } from 'class-transformer'
 import { dateTransformer } from '@/utils/transformer'
 import { Dayjs } from 'dayjs'
 import Validator from '@/decorator/Validator'
@@ -84,10 +84,11 @@ export default class User extends BaseModel {
     return '123'
   }
 
-  // 如果不想序列化某个字段，可以使用 Exclude 装饰器
-  @Field({ name: '密码' })
-  @Exclude()
-  password!: string
+  // ignore 传递 true 控制 序列化 和 反序列化 时忽略该字段
+  // ignore 传递 { onDeserialize: true, onSerialize: false } 控制只在反序列化（`DemoUser.from()`）时忽略该字段
+  // ignore 传递 { onDeserialize: false, onSerialize: true } 控制只在序列化（`DemoUser.toPlain()`）时忽略该字段
+  @Field({ name: '密码', ignore: true })
+  password: string = '123'
 
   // 如果对于 map 里的字段名不需要进行 naming case 的转换
   // 可以设定一个空的class，并继承 BaseModel，同时用 @Model 指定 rename 为 NamingCase.NonCase
@@ -98,6 +99,7 @@ export default class User extends BaseModel {
   map!: Record<string, any>
 
   // getter 默认不会序列化，如果想序列化，需要指定 fieldName
+  // getter 在反序列化时永远会被忽略
   @Field({ name: '是否成年', fieldName: 'is_adult' })
   get isAdult() {
     return this.age >= 18
@@ -120,6 +122,7 @@ const raw = {
   last_modified: '2020-01-01 00:00:00',
   custom_transform: { a_a: 123, AB_CD: 'abc' },
   profile: [],
+  password: 'xxxxx_password',
   map: {
     key_1: 'value_1',
     KEY2: 'value_2',

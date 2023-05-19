@@ -7,7 +7,10 @@ export interface Field {
   fieldName?: string
   description?: string
   type?: any
-  transform?: (params: TransformFnParams) => any
+  transform?: (params: TransformFnParams) => any,
+  // onDeserialize: ignore current field when deserialization
+  // onSerialize: ignore current field when serialization
+  ignore?: { onDeserialize?: boolean, onSerialize?: boolean } | boolean
 }
 
 const FIELD_KEY = Symbol('FIELD')
