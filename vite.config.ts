@@ -1,19 +1,16 @@
 import { defineConfig } from 'vite'
-import swc from 'rollup-plugin-swc'
 import vue from '@vitejs/plugin-vue'
+import metadata from './metadata'
 
 // esbuild does not support emitDecoratorMetadata, use swc instead
 export default defineConfig({
+  resolve: {
+    alias: [
+      { find: '@', replacement: '/src' },
+    ]
+  },
   plugins: [
+    metadata({ include: [/.ts$/], tsconfig: 'tsconfig.json' }),
     vue(),
-    swc({
-      test: 'ts',
-      jsc: {
-        target: 'es2021',
-        transform: { decoratorMetadata: true },
-        parser: { syntax: 'typescript', decorators: true },
-      },
-    })
   ],
-  esbuild: false,
 })

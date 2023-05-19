@@ -12,15 +12,20 @@
   "license": "ISC",
   "dependencies": {
     "class-transformer": "^0.5.1",
+    "dayjs": "^1.11.7",
     "reflect-metadata": "^0.1.13",
     "vue": "^3.3.2"
   },
   "devDependencies": {
+    "@rollup/pluginutils": "^5.0.2",
+    "@types/node": "^20.2.0",
     "@vitejs/plugin-vue": "^4.2.3",
+    "esbuild": "^0.17.19",
     "esno": "^0.16.3",
     "nodemon": "^2.0.22",
-    "rollup-plugin-swc": "^0.2.1",
+    "strip-comments": "^2.0.1",
     "typescript": "^5.0.4",
-    "vite": "^4.3.6"
+    "vite": "^4.3.6",
+    "vite-plugin-decorator-metadata": "^1.0.3"
   }
 }

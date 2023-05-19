@@ -46,4 +46,6 @@ export const namingCaseFnMap: Record<NamingCase, (str: string) => string> = {
   [NamingCase.camelCase]: camelize,
   [NamingCase.snake_case]: snakeize,
   [NamingCase.PascalCase]: pascalize,
+  // do nothing
+  [NamingCase.NonCase]: (str: string) => str,
 }

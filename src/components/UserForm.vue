@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import User from '../model/User';
 
-
-const fieldConfs = User.getFieldConfs();
+const fields = User.getFields();
 </script>
 
 <template>
@@ -10,14 +9,14 @@ const fieldConfs = User.getFieldConfs();
     <form>
       <div>
         <label for="">
-          <span>{{ fieldConfs.name.name }}</span>
-          <input type="text" :placeholder="fieldConfs.name.description" />
+          <span>{{ fields.firstName.name }}</span>
+          <input type="text" :placeholder="fields.firstName.description" />
         </label>
       </div>
       <div>
         <label for="">
-          <span>{{ fieldConfs.mobilePhone.name }}</span>
-          <input type="text" :placeholder="fieldConfs.mobilePhone.description" />
+          <span>{{ fields.mobilePhone.name }}</span>
+          <input type="text" :placeholder="fields.mobilePhone.description" />
         </label>
       </div>
     </form>
