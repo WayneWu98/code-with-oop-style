@@ -1,82 +1,83 @@
 import BaseModel from './BaseModel'
 import Model from '../decorator/Model'
 import Field from '../decorator/Field'
-import { NamingCase } from '@/utils/naming-case'
+import { NamingCase } from '@/naming-case'
 import { TransformationType } from 'class-transformer'
-import { dateTransformer } from '@/utils/transformer'
+import { dateTransformer } from '@/transformer'
 import { Dayjs } from 'dayjs'
 import Validator from '@/decorator/Validator'
-import { Pattern, Range } from '@/utils/validator'
+import { Pattern, Range, Required } from '@/validator'
 
-@Model({ name: '用户资料', rename: NamingCase.PascalCase })
+@Model({ name: 'Profile Model', rename: NamingCase.PascalCase })
 class Profile extends BaseModel { }
 
-@Model({ name: '假模型', rename: NamingCase.NonCase })
+@Model({ name: 'Fake Model', rename: NamingCase.NonCase })
 class FakeModel extends BaseModel { }
 
-// 所有 model 必须继承 BaseModel
-// rename 指定了这个类在序列化时字段名风格的转换方式，
-// 如果不指定则默认为 snake_case
-@Model({ name: '示例用户', rename: NamingCase.snake_case })
+// every model must extends BaseModel
+// rename indicates which naming-case conversion strategy will be used when serializing this model
+// and the default value is NamingCase.camelCase when not specified
+@Model({ name: 'User Model', rename: NamingCase.snake_case })
 export default class User extends BaseModel {
-  // 指定一个与类属性名不同的字段名，fieldName 会覆盖 @Model 的 rename 行为
-  // 可以指定默认值，使用 DemoUser.default() 创建实例时会使用默认值，
-  // 但即便指定了默认值，仍需要进行类型标注，因为类型推断在 emitDecoratorMetadata feature 中无效 ('design:type' 为 Object)
-  @Field({ name: '用户ID', fieldName: 'uid' })
+  // specifying a fieldName that is different from property name will override the rename behavior of @Model
+  // set a default value for this field, and it will be used when creating an instance with DemoUser.default()
+  // but even specified a default value, you still need to specify the type, because type inference is invalid in emitDecoratorMetadata feature ('design:type' is Object)
+  @Field({ name: 'User Id', fieldName: 'uid' })
   id: number = 0
 
-  @Field({ name: '姓' })
+  @Field({ name: 'First Name' })
   firstName!: string
 
-  @Field({ name: '名' })
+  @Field({ name: 'Last Name' })
   lastName!: string
 
-  @Field({ name: '年龄' })
-  // 添加校验规则
-  @Validator(Range(0, 120))
+  @Field({ name: 'Age' })
+  // specify validators for this field, and it will be used when validating this field by calling `User.prototype.validate('age')` or `User.prototype.validate()`
+  @Validator(Required(), Range(0, 120))
   age!: number
 
   @Field({
-    name: '手机号',
-    description: '11位手机号码'
+    name: 'Mobile Phone',
+    description: 'this is a description for mobile phone field'
   })
+  // specify a validator that validates the field value is a valid mobile phone number
   @Validator(Pattern(/^1[3456789]\d{9}$/))
   mobilePhone!: string
 
-  // transform 指定了这个字段值在序列化时的转换方式，
-  // 指定 transform 有两个注意的地方：
-  // 1. 该字段的数据完全需要自己手动处理，包括字段名的命名规范（如果是一个 object 的话）
-  // 2. 无需再指定 type，因为 type 本身只是默认的一个转换方式，但 type 无论在 序列化 还是 反序列化时，都只会笨拙的转换为 type 指定类型，缺少了针对 序列化/反序列化 的区分处理
+  // `transform` set the transformation strategy for this field when serializing and deserializing
+  // there are 2 attention points:
+  // 1. this data should be handled entirely by yourself, and the library will not do anything for you
+  // 2. no need to specify the type of this field, because the type of this field is determined by the return value of the transform function
   @Field({
-    name: '创建时间',
+    name: 'Last Modified',
     transform: dateTransformer('YYYY-MM-DD HH:mm:ss')
   })
   lastModified?: Dayjs
 
   @Field({
-    name: '自定义转换',
+    name: 'Custom Transform',
     transform({ value, type }) {
       if (type === TransformationType.PLAIN_TO_CLASS) {
-        // 反序列化时，转为字符串
-        return JSON.stringify(value)
-        // 又或者直接转为另一个数据模型
-        // SomeModel.from(value)
+        // transform to a model instance (if it is a model)
+        // @ts-ignore
+        SomeModel.from(value)
       }
       if (type === TransformationType.CLASS_TO_PLAIN) {
-        // 序列化时，转为对象
-        return JSON.parse(value)
-        // 又或者直接序列化（如果是一个数据模型的话）
-        // value.toPlain()
+        // transform to a plain object
+        value.toPlain()
       }
-      return value
+      
+      // in the end, return a clone of the value
+      return value.clone()
     }
   })
-  customTransform!: string
+  // @ts-ignore
+  customTransform!: SomeModel
 
-  // 如果该类型是一个 Profile 组成的数组，需要指定 type 为数组元素的类型
-  // 因为在编译器 tsc 只会默认推导为 Array，而不会推导为 Array<Profile>
-  // 导致最终序列化时，数据不会转换为 Profile 类型
-  @Field({ name: '个人资料', type: Profile })
+  // if current field is an array, you need to specify the type of the array elements
+  // because tsc will only infer it as Array, not Array<Profile> in the compiler
+  // which will cause the data not to be converted to Profile type when deserializing
+  @Field({ name: 'Profile', type: Profile })
   profile!: Profile[]
 
   @Field({ name: '全名' })
@@ -84,40 +85,41 @@ export default class User extends BaseModel {
     return '123'
   }
 
-  // ignore 传递 true 控制 序列化 和 反序列化 时忽略该字段
-  // ignore 传递 { onDeserialize: true, onSerialize: false } 控制只在反序列化（`DemoUser.from()`）时忽略该字段
-  // ignore 传递 { onDeserialize: false, onSerialize: true } 控制只在序列化（`DemoUser.toPlain()`）时忽略该字段
-  @Field({ name: '密码', ignore: true })
+  // when ignore is true, this field will be ignored when serializing and deserializing
+  // when ignore is { onDeserialize: true, onSerialize: false }, this field will be ignored when deserializing
+  // when ignore is { onDeserialize: false, onSerialize: true }, this field will be ignored when serializing
+  @Field({ name: 'Password', ignore: true })
   password: string = '123'
 
-  // 如果对于 map 里的字段名不需要进行 naming case 的转换
-  // 可以设定一个空的class，并继承 BaseModel，同时用 @Model 指定 rename 为 NamingCase.NonCase
-  // 因为任何字段的命名风格转换都将受自身类型的影响，如果自身类型没有继承 BaseModel 或 没有装饰 @Model
-  // 则会向父类型进行查找，直到找到一个继承 BaseModel 并装饰了 @Model 的类型
-  // 更为极端的情况可以自行实行 transform 方法，以控制 序列化/反序列化 的行为，可以参考 utils/transformer.ts
-  @Field({ name: '假模型', type: FakeModel })
+  // if you don't want to convert the field name to naming case for the field name in the map
+  // you can specify an empty class and inherit BaseModel, and specify rename to NamingCase.NonCase with @Model
+  // because the naming case conversion of any field name will be affected by its own type
+  // if the type itself does not inherit BaseModel or is not decorated with @Model
+  // it will look up to the parent type until it finds a type that inherits BaseModel and is decorated with @Model
+  // a more extreme case is to implement the transform method yourself to control the behavior of serialization/deserialization, you can refer to transformer.ts
+  @Field({ name: 'Map', type: FakeModel })
   map!: Record<string, any>
 
-  // getter 默认不会序列化，如果想序列化，需要指定 fieldName
-  // getter 在反序列化时永远会被忽略
-  @Field({ name: '是否成年', fieldName: 'is_adult' })
+  // as default, getter field will not be serialized, if you want to serialize it, you need to specify fieldName
+  // and getter field will never be deserialized
+  @Field({ name: 'Adult', fieldName: 'is_adult' })
   get isAdult() {
     return this.age >= 18
   }
 }
 
-// 获取 Model 的配置
+// get the model settings
 User.getModel()
-// 获取某个字段的配置
+// get the field settings
 User.getField('id')
-// 获取所有字段的配置
+// get all field settings
 User.getFields()
 
 const raw = {
   uid: 0,
-  first_name: '张',
-  last_name: '三',
-  age: 18,
+  first_name: 'Nikola',
+  last_name: 'Jokic',
+  age: 28,
   mobile_phone: '13800138000',
   last_modified: '2020-01-01 00:00:00',
   custom_transform: { a_a: 123, AB_CD: 'abc' },
@@ -130,40 +132,46 @@ const raw = {
   }
 }
 
-// 使用 from 反序列化
+// deserialize a plain object to a model instance
 const user = User.from(raw)
-// 使用 toPlain 序列化
+// serialize a model instance to a plain object
 const plain = user.toPlain()
 
 console.log('user', user)
 console.log('plain', plain)
 
-// 克隆出新的 model 实例
+// clone a model instance
 const cloned = user.clone()
 cloned.id = 2
-// 将另一个合并到 user, 会覆盖掉 user 中的字段
+// merge clone to another model instance, and user field values will be overwritten by cloned field values
 user.merge(cloned)
 
 console.log('user', user)
 console.log('cloned', cloned)
 
-// 混合两个 user 并返回新的实例，不会修改原有实例
+// mix clone and use and return a new User instance, and original user and cloned will not be changed
 const mixed = user.mix(cloned)
 console.log('mixed', mixed)
 
-// 创建一个默认的实例
+// create a new model instance with default values
 const dft = User.default()
 dft.age = -1
 
-// 校验某个字段 age
-dft.validate('age').then((errors) => {
-  console.log('validate age results', errors)
+// validate age whether is valid
+dft.validate('age').then((error) => {
+  if (!error) {
+    // age is valid
+  }
 })
-// 校验某个字段 firstName
-dft.validate('firstName').then((errors) => {
-  console.log('validate firstName results', errors)
+// validate firstName whether is valid
+dft.validate('firstName').then((error) => {
+  if (!error) {
+    // firstName is valid
+  }
 })
-// 校验所有字段
+// validate all fields whether are valid
 dft.validate().then((errors) => {
-  console.log('results', errors)
+  if (!errors?.length) {
+    // all fields are valid
+  }
 })

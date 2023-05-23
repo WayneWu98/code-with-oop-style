@@ -1,5 +1,8 @@
 import 'reflect-metadata'
-import { NamingCase } from '@/utils/naming-case'
+import { NamingCase } from '@/naming-case'
+
+let defaultPlainNamingCase: NamingCase = NamingCase.snake_case
+export const setDefaultPlainNamingCase = (namingCase: NamingCase) => defaultPlainNamingCase = namingCase
 
 export interface Model {
   name?: string
@@ -10,7 +13,7 @@ const MODEL_KEY = Symbol('MODEL')
 
 export default function (conf: Model) {
   if (!Reflect.has(conf, 'rename')) {
-    conf.rename = NamingCase.snake_case
+    conf.rename = defaultPlainNamingCase
   }
   return Reflect.metadata(MODEL_KEY, conf)
 }

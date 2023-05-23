@@ -1,38 +1,60 @@
 import { ClassConstructor, instanceToPlain, plainToInstance } from 'class-transformer'
 import { getModel, Model } from '@/decorator/Model'
 import { getField, getFields, Field, getFieldList } from '../decorator/Field'
-import { NamingCase, camelize, namingCaseFnMap } from '@/utils/naming-case'
+import { NamingCase, namingCaseFnMap } from '@/naming-case'
 import { Validator, getFieldValidators } from '@/decorator/Validator'
 
-// !!! every model should extend this class
+let defaultClassNamingCase: NamingCase = NamingCase.camelCase
+export const setDefaultClassNamingCase = (namingCase: NamingCase) => defaultClassNamingCase = namingCase
+
+/**
+ * Every model should inherit this class.
+ */
 export default class BaseModel {
+  /**
+   * instanceToInstance will not convert naming case, call our implementation instead.
+   */
   clone() {
-    // instanceToInstance will not convert naming case, call our implementation instead
     const model = Reflect.getPrototypeOf(this)!.constructor as typeof BaseModel
     return plainToInstance(model, this.toModelPlain(), { ignoreDecorators: true }) as typeof this
   }
-  // merge target to this in-place, existing properties will be overwritten
+  /**
+   * Merge target to this in-place, existing properties will be overwritten.
+   */
   merge(target: typeof this) {
     return Object.assign(this, target)
   }
-  // mix target and this to be a new instance
+  /**
+   * Mix target and this to be a new instance.
+   */
   mix(target: typeof this) {
     return Object.assign(this.clone(), target)
   }
+  /**
+   * Convert current model to plain object.
+   */
   toPlain(): Object {
     const cls = Reflect.getPrototypeOf(this)!.constructor
     return traverseOnSerialize(instanceToPlain(this), cls, cls)
   }
+  /**
+   * there are 2 differences to `toPlain`:
+   * 
+   * 1. no naming-case conversion;
+   * 2. no field will be ignore.
+   * 
+   * For this lib, it is only used in `clone` method.
+   */
   toModelPlain() {
-    /**
-     * there are 2 differences to `toPlain`
-     * 1. no naming-case conversion
-     * 2. no field will be ignore
-     */
     return instanceToPlain(this)
   }
-  // validate current model, return a list of errors, empty list means no error
-  // and child models **will not** be validated automatically, you should do it yourself
+  /**
+   * Validate current model **by shallow**, return a list of errors when validate all fields, or a single error message when validate a specific field, empty list or undefined means no error.
+   * 
+   * Child models **will not** be validated automatically, you should do it yourself.
+   */
+  validate<T extends BaseModel>(this: T, field: keyof T): Promise<string>
+  validate<T extends BaseModel>(this: T): Promise<{ field: keyof T; message: string }[]>
   async validate<T extends BaseModel>(this: T, field?: keyof T) {
     const model = Reflect.getPrototypeOf(this)!.constructor as ClassConstructor<T>
     const validators = {} as Record<keyof typeof this, Validator[]>
@@ -52,10 +74,13 @@ export default class BaseModel {
       Object.entries(validators).map(([field, validators]) => {
         return Promise.all(validators.map((validator) => validator(this[field as keyof T], this))).catch(
           // @ts-ignore
-          (err: Error) => errors.push({ field, message: err.message })
+          (message: string) => errors.push({ field, message })
         )
       })
     )
+    if (field) {
+      return errors[0]?.message
+    }
     return errors
   }
   static getFieldValidators<T extends ClassConstructor<BaseModel>>(this: T, field: keyof InstanceType<T>) {
@@ -159,7 +184,7 @@ function traverseOnDeserialize(obj: any, cls: any, superCls: any): any {
     const shouldSkipConvert =
       arrayedFields.some((conf) => conf.fieldName === rawKey) || model?.rename === NamingCase.NonCase
     if (!shouldSkipConvert) {
-      k = camelize(rawKey)
+      k = namingCaseFnMap[defaultClassNamingCase](rawKey)
     }
     const field = fields[k] as Field
     if (shouldIgnoreDeserialize(field)) {

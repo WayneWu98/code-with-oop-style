@@ -6,5 +6,5 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["vite.config.ts", "metadata.ts"]
+  "include": ["vite.config.ts", "vite-plugin/emit-decorator-metadata.ts"]
 }

@@ -10,6 +10,7 @@
 
 /**
  * !!!! ATTENTION !!!!
+ * 
  * every transformer function should handle 3 cases maybe happen: 
  * 1. instance to plain object
  * 2. plain object to instance

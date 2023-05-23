@@ -2,7 +2,7 @@ import { ClassConstructor } from 'class-transformer'
 import 'reflect-metadata'
 
 export interface Validator {
-  (value: any, model: any): Promise<void>
+  (value: any, obj: any): Promise<void>
 }
 
 const VALIDATOR_KEY = Symbol('VALIDATOR')

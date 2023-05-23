@@ -1,15 +1,24 @@
 {
-  "name": "decorative-dto-demo",
-  "version": "1.0.0",
-  "description": "",
-  "private": true,
-  "main": "index.js",
+  "name": "decorative-model",
+  "version": "0.1.0",
+  "description": "This is a helper lib for coding the logic of dto and data model with oop style",
+  "type": "module",
+  "main": "./src/main.ts",
+  "module": "./src/main.ts",
   "scripts": {
     "dev": "vite"
   },
-  "keywords": [],
+  "repository": { "type": "git", "url": "https://github.com/WayneWu98/decorative-model" },
+  "sideEffects": false,
+  "exports": {
+    "./validator": "./src/validator",
+    "./transformer": "./src/transformer",
+    "./naming-case": "./src/naming-case",
+    "./decorator/": "./src/decorator/"
+  },
+  "keywords": ["class-transformer", "decorator", "oop", "dto", "data model", "typescript"],
   "author": "Wayne Wu <wayne-wu@outlook.com> (https://wayne-wu.com)",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "class-transformer": "^0.5.1",
     "dayjs": "^1.11.7",
@@ -20,12 +29,7 @@
     "@rollup/pluginutils": "^5.0.2",
     "@types/node": "^20.2.0",
     "@vitejs/plugin-vue": "^4.2.3",
-    "esbuild": "^0.17.19",
-    "esno": "^0.16.3",
-    "nodemon": "^2.0.22",
-    "strip-comments": "^2.0.1",
     "typescript": "^5.0.4",
-    "vite": "^4.3.6",
-    "vite-plugin-decorator-metadata": "^1.0.3"
+    "vite": "^4.3.6"
   }
 }

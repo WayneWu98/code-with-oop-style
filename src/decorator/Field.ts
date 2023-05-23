@@ -1,6 +1,6 @@
 import { ClassConstructor, Expose, Transform, TransformFnParams } from 'class-transformer'
 import 'reflect-metadata'
-import { typeTransformer } from '@/utils/transformer'
+import { typeTransformer } from '@/transformer'
 
 export interface Field {
   name?: string

@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import metadata from './metadata'
+import emitDecoratorMetadata from './vite-plugin/emit-decorator-metadata'
 
 // esbuild does not support emitDecoratorMetadata, use swc instead
 export default defineConfig({
@@ -10,7 +10,7 @@ export default defineConfig({
     ]
   },
   plugins: [
-    metadata({ include: [/.ts$/], tsconfig: 'tsconfig.json' }),
+    emitDecoratorMetadata({ include: [/.ts$/], tsconfig: 'tsconfig.json' }),
     vue(),
   ],
 })
