@@ -1,12 +1,12 @@
 import BaseModel from './BaseModel'
 import Model from '../decorator/Model'
 import Field from '../decorator/Field'
-import { NamingCase } from '@/naming-case'
+import { NamingCase } from '../naming-case'
 import { TransformationType } from 'class-transformer'
-import { dateTransformer } from '@/transformer'
+import { dateTransformer } from '../transformer'
 import { Dayjs } from 'dayjs'
-import Validator from '@/decorator/Validator'
-import { Pattern, Range, Required } from '@/validator'
+import Validator from '../decorator/Validator'
+import { Pattern, Range, Required } from '../validator'
 
 @Model({ name: 'Profile Model', rename: NamingCase.PascalCase })
 class Profile extends BaseModel { }

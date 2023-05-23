@@ -1,9 +1,9 @@
 /**
- * there are some helper functions for `Field` decorator (ref to @/decorator/Field.ts),
+ * there are some helper functions for `Field` decorator (ref to decorator/Field.ts),
  * it can be used to transform the data type of the property when serialization/deserialization.
  * @example:
- * import Field from '@/decorator/Field'
- * import { dateTransformer } from '@/utils/transformer'
+ * import Field from 'decorator/Field'
+ * import { dateTransformer } from 'utils/transformer'
  *
  * @Field({ transform: dateTransformer('yyyy-MM-dd') })
  */
@@ -56,7 +56,7 @@ export function dateTransformer(format: string) {
 
 /**
 * this transformer is only used for class-transformer, never use it in other places
-* @see @/decorator/Field.ts
+* @see decorator/Field.ts
 */
 export function typeTransformer(cls: ClassConstructor<unknown>) {
   return (params: TransformFnParams) => {

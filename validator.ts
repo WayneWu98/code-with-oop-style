@@ -1,10 +1,10 @@
 /**
- * there are some validator functions for `Validator` decorator (ref to @/decorator/Validator.ts),
+ * there are some validator functions for `Validator` decorator (ref to decorator/Validator.ts),
  * it can be used to validate value while calling Model.validate().
  *
  * @example:
- * import Validator from '@/decorator/Validator'
- * import { Required, Range } from '@/utils/validator'
+ * import Validator from 'decorator/Validator'
+ * import { Required, Range } from 'utils/validator'
  *
  * @Validator(Required(), Range(1, 10))
  */

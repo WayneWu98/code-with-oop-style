@@ -24,7 +24,7 @@ Decorator is a good way to solve these problems, it can help us to do some extra
 
 ## Usage
 
-For mostly cases, refer to [./src/model/User.ts](./src/model/User.ts)
+For mostly cases, refer to [./model/User.ts](./model/User.ts)
 
 ## Attentions
 

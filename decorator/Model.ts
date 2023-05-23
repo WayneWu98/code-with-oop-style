@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { NamingCase } from '@/naming-case'
+import { NamingCase } from '../naming-case'
 
 let defaultPlainNamingCase: NamingCase = NamingCase.snake_case
 export const setDefaultPlainNamingCase = (namingCase: NamingCase) => defaultPlainNamingCase = namingCase

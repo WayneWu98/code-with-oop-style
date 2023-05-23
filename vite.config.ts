@@ -6,7 +6,7 @@ import emitDecoratorMetadata from './vite-plugin/emit-decorator-metadata'
 export default defineConfig({
   resolve: {
     alias: [
-      { find: '@', replacement: '/src' },
+      { find: '@', replacement: '/' },
     ]
   },
   plugins: [

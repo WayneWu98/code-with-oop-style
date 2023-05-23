@@ -1,8 +1,8 @@
 import { ClassConstructor, instanceToPlain, plainToInstance } from 'class-transformer'
-import { getModel, Model } from '@/decorator/Model'
+import { getModel, Model } from '../decorator/Model'
 import { getField, getFields, Field, getFieldList } from '../decorator/Field'
-import { NamingCase, namingCaseFnMap } from '@/naming-case'
-import { Validator, getFieldValidators } from '@/decorator/Validator'
+import { NamingCase, namingCaseFnMap } from '../naming-case'
+import { Validator, getFieldValidators } from '../decorator/Validator'
 
 let defaultClassNamingCase: NamingCase = NamingCase.camelCase
 export const setDefaultClassNamingCase = (namingCase: NamingCase) => defaultClassNamingCase = namingCase
