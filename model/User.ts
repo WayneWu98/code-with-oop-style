@@ -60,11 +60,11 @@ export default class User extends BaseModel {
       if (type === TransformationType.PLAIN_TO_CLASS) {
         // transform to a model instance (if it is a model)
         // @ts-ignore
-        SomeModel.from(value)
+        return SomeModel.from(value)
       }
       if (type === TransformationType.CLASS_TO_PLAIN) {
         // transform to a plain object
-        value.toPlain()
+        return value.toPlain()
       }
       
       // in the end, return a clone of the value
