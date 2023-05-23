@@ -1,6 +1,6 @@
 {
   "name": "decorative-model",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "This is a helper lib for coding the logic of dto and data model with oop style",
   "type": "module",
   "main": "./main.ts",

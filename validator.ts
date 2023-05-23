@@ -22,7 +22,7 @@ export const Required = (message: MessageProvider = 'This field is required!') =
     }
     if (value === undefined || value === null || value === '') {
       // @ts-ignore
-      return Promise.reject(message?.(value, obj) ?? message)
+      return Promise.reject(typeof message === 'function' ? message(value, obj) : message)
     }
     return Promise.resolve()
   }
@@ -38,7 +38,7 @@ export const Range = (min: number, max: number, message: MessageProvider = `The 
     }
     if (value < min || value > max) {
       // @ts-ignore
-      return Promise.reject(message?.(value, obj) ?? message)
+      return Promise.reject(typeof message === 'function' ? message(value, obj) : message)
     }
     return Promise.resolve()
   }
@@ -54,7 +54,7 @@ export const Length = (min: number, max: number, message: MessageProvider = `The
     }
     if (value.length < min || value.length > max) {
       // @ts-ignore
-      return Promise.reject(message?.(value, obj) ?? message)
+      return Promise.reject(typeof message === 'function' ? message(value, obj) : message)
     }
     return Promise.resolve()
   }
@@ -64,7 +64,7 @@ export const Pattern = (pattern: RegExp, message: MessageProvider = 'The value i
   return (value: any, obj: any) => {
     if (!pattern.test(value)) {
       // @ts-ignore
-      return Promise.reject(message?.(value, obj) ?? message)
+      return Promise.reject(typeof message === 'function' ? message(value, obj) : message)
     }
     return Promise.resolve()
   }
