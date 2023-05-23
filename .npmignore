@@ -1,0 +1,5 @@
+vite-plugin/emit-decorator-metadata.ts
+./components/
+*.vue
+*.html
+.gitignore
